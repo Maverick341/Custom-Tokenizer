@@ -72,12 +72,12 @@ Custom-Tokenizer/
 ### 1. Encoding Text
 Here you can see the text being converted into tokens on the Encode tab.
 
-![Encode Screenshot](assets/encode-screenshot.png)
+![Encode Screenshot](https://res.cloudinary.com/dlh6vfiun/image/upload/v1756664025/encode-screenshot_xi2pbq.png)
 
 ### 2. Decoding Tokens
 And here is the result of converting those tokens back to text on the Decode tab.
 
-![Decode Screenshot](assets/decode-screenshot.png)
+![Decode Screenshot](https://res.cloudinary.com/dlh6vfiun/image/upload/v1756664024/decode-screenshot_wq36dd.png)
 
 ---
 
