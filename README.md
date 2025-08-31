@@ -22,7 +22,7 @@ Custom-Tokenizer/
 
 1. **Clone the repository:**
    ```powershell
-   git clone <your-repo-url>
+   git clone https://github.com/Maverick341/Custom-Tokenizer.git
    cd Custom-Tokenizer
    ```
 
