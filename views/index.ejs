@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= title %>
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .tab-active {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .tab-inactive {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+
+        .tab-inactive:hover {
+            background-color: #d1d5db;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">
+            <span class="text-blue-600">Custom</span> Tokenizer
+        </h1>
+
+        <div class="flex mb-6 border-b border-gray-200">
+            <button id="encodeTab" class="px-6 py-3 font-medium rounded-t-lg transition-colors tab-active">
+                Encode Text
+            </button>
+            <button id="decodeTab" class="px-6 py-3 font-medium rounded-t-lg transition-colors tab-inactive">
+                Decode Tokens
+            </button>
+        </div>
+
+        <div id="encodeContent" class="tab-content">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Text to Tokens</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="inputText" class="block text-sm font-medium text-gray-700 mb-2">
+                            Enter text to encode:
+                        </label>
+                        <textarea id="inputText" rows="4"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Type your sentence here...">The old man will find it.</textarea>
+                    </div>
+                    <button id="encodeBtn"
+                        class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                        Encode
+                    </button>
+                </div>
+
+                <div class="mt-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Encoded Tokens:
+                    </label>
+                    <div id="encodedOutput"
+                        class="bg-gray-50 border border-gray-300 rounded-md p-3 min-h-[60px] font-mono text-sm"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="decodeContent" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">Tokens to Text</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label for="inputTokens" class="block text-sm font-medium text-gray-700 mb-2">
+                            Enter tokens to decode (comma separated):
+                        </label>
+                        <input type="text" id="inputTokens"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="e.g. 2,22,152,115,60,42,116,30,3" />
+                    </div>
+                    <button id="decodeBtn"
+                        class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-md transition-colors">
+                        Decode
+                    </button>
+                </div>
+
+                <div class="mt-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Decoded Text:
+                    </label>
+                    <div id="decodedOutput" class="bg-gray-50 border border-gray-300 rounded-md p-3 min-h-[60px]"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Sample Demo</h3>
+            <button id="runSample"
+                class="bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-md transition-colors mb-4">
+                Run Sample
+            </button>
+            <div id="sampleResult" class="bg-gray-50 border border-gray-300 rounded-md p-3 min-h-[80px]"></div>
+        </div>
+    </div>
+
+    <script>
+        const encodeTab = document.getElementById('encodeTab');
+        const decodeTab = document.getElementById('decodeTab');
+        const encodeContent = document.getElementById('encodeContent');
+        const decodeContent = document.getElementById('decodeContent');
+
+        function switchToEncode() {
+            encodeTab.className = 'px-6 py-3 font-medium rounded-t-lg transition-colors tab-active';
+            decodeTab.className = 'px-6 py-3 font-medium rounded-t-lg transition-colors tab-inactive';
+            encodeContent.classList.remove('hidden');
+            decodeContent.classList.add('hidden');
+        }
+
+        function switchToDecode() {
+            decodeTab.className = 'px-6 py-3 font-medium rounded-t-lg transition-colors tab-active';
+            encodeTab.className = 'px-6 py-3 font-medium rounded-t-lg transition-colors tab-inactive';
+            decodeContent.classList.remove('hidden');
+            encodeContent.classList.add('hidden');
+        }
+
+        encodeTab.addEventListener('click', switchToEncode);
+        decodeTab.addEventListener('click', switchToDecode);
+
+        async function encodeText() {
+            const text = document.getElementById('inputText').value.trim();
+            if (!text) {
+                document.getElementById('encodedOutput').textContent = 'Please enter some text.';
+                return;
+            }
+
+            try {
+                const response = await fetch('/encode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('encodedOutput').textContent = result.tokensString;
+                    document.getElementById('inputTokens').value = result.tokensString;
+                } else {
+                    document.getElementById('encodedOutput').textContent = 'Error: ' + result.error;
+                }
+            } catch (error) {
+                document.getElementById('encodedOutput').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function decodeTokens() {
+            const tokens = document.getElementById('inputTokens').value.trim();
+            if (!tokens) {
+                document.getElementById('decodedOutput').textContent = 'Please enter some tokens.';
+                return;
+            }
+
+            try {
+                const response = await fetch('/decode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ tokens })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('decodedOutput').textContent = result.text;
+                } else {
+                    document.getElementById('decodedOutput').textContent = 'Error: ' + result.error;
+                }
+            } catch (error) {
+                document.getElementById('decodedOutput').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function runSample() {
+            const sample = 'The old man will find it.';
+
+            try {
+                const encodeResponse = await fetch('/encode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: sample })
+                });
+
+                const encodeResult = await encodeResponse.json();
+
+                if (!encodeResult.success) {
+                    throw new Error(encodeResult.error);
+                }
+
+                const decodeResponse = await fetch('/decode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ tokens: encodeResult.tokensString })
+                });
+
+                const decodeResult = await decodeResponse.json();
+
+                if (!decodeResult.success) {
+                    throw new Error(decodeResult.error);
+                }
+
+                document.getElementById('sampleResult').innerHTML = `
+                    <div class="space-y-2">
+                        <div><strong>Sample:</strong> "${sample}"</div>
+                        <div><strong>Encoded:</strong> [${encodeResult.tokensString}]</div>
+                        <div><strong>Decoded:</strong> "${decodeResult.text}"</div>
+                    </div>
+                `;
+
+                document.getElementById('inputText').value = sample;
+                document.getElementById('encodedOutput').textContent = encodeResult.tokensString;
+                document.getElementById('inputTokens').value = encodeResult.tokensString;
+                document.getElementById('decodedOutput').textContent = decodeResult.text;
+            } catch (error) {
+                document.getElementById('sampleResult').innerHTML = `<div class="text-red-600">Error: ${error.message}</div>`;
+            }
+        }
+
+        document.getElementById('encodeBtn').addEventListener('click', encodeText);
+        document.getElementById('decodeBtn').addEventListener('click', decodeTokens);
+        document.getElementById('runSample').addEventListener('click', runSample);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(runSample, 100); // Small delay to ensure everything is ready
+        });
+
+        if (document.readyState !== 'loading') {
+            setTimeout(runSample, 100);
+        }
+    </script>
+</body>
+
+</html>
