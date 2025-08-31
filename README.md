@@ -1,6 +1,6 @@
-# Custom Tokenizer Demo
+# Custom Tokenizer
 
-A simple Node.js project demonstrating a custom tokenizer for text processing, with a web interface to visualize tokenization results.
+A simple Javascript project demonstrating a custom tokenizer for text processing, with a web interface to visualize tokenization results.
 
 ---
 
